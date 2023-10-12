@@ -47,3 +47,54 @@ jobs:
         with:
           name: i18n-${{ github.sha }}
           path: ${{ github.workspace }}/vrelnir_localization/data/json/i18n.json
+
+
+      # [i18n mod] =========================================
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: ModLoader
+        uses: actions/checkout@v4
+        with:
+          repository: Lyoko-Jeremie/sugarcube-2-ModLoader
+          path: ModLoader
+          ref: master
+          submodules: recursive
+
+      - name: Build ModLoader
+        working-directory: ${{ github.workspace }}/ModLoader
+        run: |
+          yarn install
+          yarn run ts:BeforeSC2
+          yarn run webpack:BeforeSC2
+          yarn run ts:ForSC2
+          yarn run webpack:insertTools
+
+      - name: Build i18n
+        working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
+        run: |
+          yarn install
+          yarn run ts:build
+
+      - name: Copy img (Win)
+        if: runner.os == 'Windows'
+        run: copy -Path "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" -Destination "${{ github.workspace }}/ModLoader/mod/i18n/dist/i18n.json"
+
+      - name: Copy img (Linux)
+        if: runner.os == 'Linux'
+        run: cp "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" "${{ github.workspace }}/ModLoader/mod/i18n/dist/i18n.json"
+
+      # TODO change mod version in boot.json
+
+      - name: Build i18n Mod
+        working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
+        run: node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+
+      - name: Upload i18n Mod
+        uses: actions/upload-artifact@v3
+        with:
+          name: I18nMod-${{ github.sha }}
+          path: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
