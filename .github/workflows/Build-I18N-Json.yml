@@ -41,7 +41,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: 运行 Python 生成 i18n.json (在 data/json/i18n.json)
         working-directory: ${{ github.workspace }}
-        run: python ./build.py
+        run: python ${{ github.workspace }}/vrelnir_localization/build.py
       - name: 上传 i18n.json
         uses: actions/upload-artifact@v3
         with:
