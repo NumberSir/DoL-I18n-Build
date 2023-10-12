@@ -81,11 +81,11 @@ jobs:
 
       - name: Copy img (Win)
         if: runner.os == 'Windows'
-        run: copy -Path "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" -Destination "${{ github.workspace }}/ModLoader/mod/i18n/dist/i18n.json"
+        run: copy -Path "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" -Destination "${{ github.workspace }}/ModLoader/mod/i18n/i18n.json"
 
       - name: Copy img (Linux)
         if: runner.os == 'Linux'
-        run: cp "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" "${{ github.workspace }}/ModLoader/mod/i18n/dist/i18n.json"
+        run: cp "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" "${{ github.workspace }}/ModLoader/mod/i18n/i18n.json"
 
       # TODO change mod version in boot.json
 
