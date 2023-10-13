@@ -1,10 +1,11 @@
-const fs = require('fs');
+
+var fs = require('fs');
 
 console.log('process.argv', process.argv)
-const bootJson = process.argv[1];
+var bootJson = process.argv[2];
 
-const boot = JSON.parse(fs.readFileSync(bootJson, 'utf8'));
-const version = process.argv[2];
+var boot = JSON.parse(fs.readFileSync(bootJson, 'utf8'));
+var version = process.argv[3];
 
 boot.version = version;
 
