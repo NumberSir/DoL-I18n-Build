@@ -87,7 +87,9 @@ jobs:
         if: runner.os == 'Linux'
         run: cp "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" "${{ github.workspace }}/ModLoader/mod/i18n/i18n.json"
 
-      # TODO change mod version in boot.json
+      - name: change mod version in boot.json
+        working-directory: ${{ github.workspace }}
+        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}"
 
       - name: Build i18n Mod
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
