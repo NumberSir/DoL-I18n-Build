@@ -12,6 +12,7 @@ env:
   GIT_REPO: ${{secrets.GIT_REPO}}
   PARATRANZ_TOKEN: ${{secrets.PARATRANZ_TOKEN}}
   CHINESE_VERSION: 0.4.2.7-chs-alpha4.0.0
+  GAME_VERSION: 0.4.2.7
   SOURCE_TYPE: common
 
 jobs:
@@ -89,7 +90,7 @@ jobs:
 
       - name: change mod version in boot.json
         working-directory: ${{ github.workspace }}
-        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}"
+        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}" "${{ env.GAME_VERSION }}"
 
       - name: Build i18n Mod
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
