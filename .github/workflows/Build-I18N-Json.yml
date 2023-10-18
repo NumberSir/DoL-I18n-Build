@@ -51,8 +51,8 @@ jobs:
       - name: Get game version
         id: game_version
         run: |
-          version=$(<{{ github.workspace }}/vrelnir_localization/degrees-of-lewdity-master/version)
-          echo "::set-output name=version::$value"
+          version=`cat ${{ github.workspace }}/vrelnir_localization/degrees-of-lewdity-master/version`
+          echo "::set-output name=version::version"
 
   build-i18n-mod:
     needs: [build-i18n-json]
