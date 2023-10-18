@@ -16,7 +16,7 @@ env:
   SOURCE_TYPE: common
 
 jobs:
-  run-python:
+  build-i18n-mod:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,6 @@ jobs:
 
 
       # [i18n mod] =========================================
-
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -114,4 +113,5 @@ jobs:
       #  if: startsWith(github.ref, 'refs/tags/')
         with:
           files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
-          name: i18n-${{ github.sha }}
+          name: Release i18n-${{ github.sha }}
+          tag_name: ${{ github.ref }}
