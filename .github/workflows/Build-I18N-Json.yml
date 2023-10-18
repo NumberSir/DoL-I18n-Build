@@ -94,12 +94,12 @@ jobs:
         if: runner.os == 'Linux'
         run: cp "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" "${{ github.workspace }}/ModLoader/mod/i18n/i18n.json"
 
-      - name: change mod version in boot.json on scheduled task
+      - name: Change Mod Version in boot.json (Nightly)
         if: ${{ github.event_name == 'schedule' }}
         working-directory: ${{ github.workspace }}
         run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}" "${{ steps.game_version.outputs.version }}"
 
-      - name: change mod version in boot.json on manual task
+      - name: Change Mod Version in boot.json (Manually)
         if: ${{ github.event_name == 'workflow_dispatch' }}
         working-directory: ${{ github.workspace }}
         run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ github.event.inputs.chinese_version }}" "${{ steps.game_version.outputs.version }}"
@@ -114,7 +114,7 @@ jobs:
           name: I18nMod-${{ github.sha }}
           path: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
 
-      - name: Release Auto-build Nightly
+      - name: Release i18n Mod (Nightly)
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'schedule' }}
         with:
@@ -124,7 +124,7 @@ jobs:
           body: Scheduled task on ${{ steps.date.outputs.date }}
           prerelease: true
 
-      - name: Release Manually build
+      - name: Release i18n Mod (Manually)
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
