@@ -2,8 +2,6 @@ name: Build I18N
 run-name: 小月珰正在打包汉化词典，吱嘎
 
 on:
-  push:
-    branches: [ "main" ]
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
