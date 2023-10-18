@@ -34,12 +34,6 @@ jobs:
         working-directory: ${{ github.workspace }}/vrelnir_localization
         run: git submodule update --init --recursive
 
-      - name: Get game version
-        id: game_version
-        run: |
-          version=$(<{{ github.workspace }}/vrelnir_localization/degrees-of-lewdity-master/version)
-          echo "::set-output name=version::$value"
-
       - name: Python installation
         uses: actions/setup-python@v4.7.0
         with:
@@ -53,6 +47,12 @@ jobs:
       - name: Generating i18n.json (in data/json/i18n.json)
         working-directory: ${{ github.workspace }}/vrelnir_localization
         run: python ./build.py
+
+      - name: Get game version
+        id: game_version
+        run: |
+          version=$(<{{ github.workspace }}/vrelnir_localization/degrees-of-lewdity-master/version)
+          echo "::set-output name=version::$value"
 
   build-i18n-mod:
     needs: [build-i18n-json]
