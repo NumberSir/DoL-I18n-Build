@@ -119,4 +119,4 @@ jobs:
         with:
           files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
           name: Release i18n-${{ github.sha }}
-          tag_name: ${{ github.ref }}
+          tag_name: AUTO-PUSH
