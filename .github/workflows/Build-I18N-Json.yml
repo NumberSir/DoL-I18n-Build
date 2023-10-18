@@ -94,9 +94,15 @@ jobs:
         if: runner.os == 'Linux'
         run: cp "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" "${{ github.workspace }}/ModLoader/mod/i18n/i18n.json"
 
-      - name: change mod version in boot.json
+      - name: change mod version in boot.json on scheduled task
+        if: ${{ github.GITHUB_EVENT_NAME }} == 'schedule'
         working-directory: ${{ github.workspace }}
         run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}" "${{ steps.game_version.outputs.version }}"
+
+      - name: change mod version in boot.json on manual task
+        if: ${{ github.GITHUB_EVENT_NAME }} == 'workflow_dispatch'
+        working-directory: ${{ github.workspace }}
+        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ github.event.inputs.chinese_version }}" "${{ steps.game_version.outputs.version }}"
 
       - name: Build i18n Mod
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
@@ -114,7 +120,7 @@ jobs:
         with:
           files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
           name: Auto Release nightly v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
-          tag_name: v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
+          tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
           body: Scheduled task on ${{ steps.date.outputs.date }}
           prerelease: true
 
@@ -123,6 +129,6 @@ jobs:
         if: ${{ github.GITHUB_EVENT_NAME }} == 'workflow_dispatch'
         with:
           files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
-          name: Release v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}
-          tag_name: v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}
-          body: release v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}
+          name: Release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
+          tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
+          body: release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
