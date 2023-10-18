@@ -7,6 +7,9 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      chinese_version:
+        description: "汉化版本"
 
 permissions:
   contents: write
@@ -14,12 +17,12 @@ permissions:
 env:
   GIT_REPO: ${{secrets.GIT_REPO}}
   PARATRANZ_TOKEN: ${{secrets.PARATRANZ_TOKEN}}
-  CHINESE_VERSION: 0.4.2.7-chs-alpha4.0.0
-  GAME_VERSION: 0.4.2.7
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CHINESE_VERSION: alpha4.1.0
   SOURCE_TYPE: common
 
 jobs:
-  build-i18n-mod:
+  build-i18n-json:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,37 +32,37 @@ jobs:
           ref: ${{ github.head_ref }}
           submodules: true
 
-      - uses: snow-actions/git-config-user@v1.0.0
-        with:
-          name: "MoonBell"
-          email: "number_sir@126.com"
-
-      - name: 拉取子模块
+      - name: Fetch game source code
         working-directory: ${{ github.workspace }}/vrelnir_localization
         run: git submodule update --init --recursive
 
-      - name: 安装 Python
+      - name: Get game version
+        id: game_version
+        run: |
+          version=$(<{{ github.workspace }}/vrelnir_localization/degrees-of-lewdity-master/version)
+          echo "::set-output name=version::$value"
+
+      - name: Python installation
         uses: actions/setup-python@v4.7.0
         with:
           python-version: '3.10.11'
           cache: 'pip'
 
-      - name: 安装 Python 所需库
+      - name: Python libs installation
         working-directory: ${{ github.workspace }}/vrelnir_localization
         run: pip install -r requirements.txt
 
-      - name: 运行 Python 生成 i18n.json (在 data/json/i18n.json)
+      - name: Generating i18n.json (in data/json/i18n.json)
         working-directory: ${{ github.workspace }}/vrelnir_localization
         run: python ./build.py
 
-      # - name: 上传 i18n.json
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: i18n-${{ github.sha }}
-      #     path: ${{ github.workspace }}/vrelnir_localization/data/json/i18n.json
-
-
-      # [i18n mod] =========================================
+  build-i18n-mod:
+    needs: [build-i18n-json]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date + '%Y%m%d')"
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -99,7 +102,7 @@ jobs:
 
       - name: change mod version in boot.json
         working-directory: ${{ github.workspace }}
-        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}" "${{ env.GAME_VERSION }}"
+        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}" "${{ steps.game_version.outputs.version }}"
 
       - name: Build i18n Mod
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
@@ -111,12 +114,21 @@ jobs:
           name: I18nMod-${{ github.sha }}
           path: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
 
-      - name: Release
+      - name: Release Auto-build Nightly
         uses: softprops/action-gh-release@v1
-      #  if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ github.GITHUB_EVENT_NAME }} == 'schedule'
         with:
           files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
-          name: Release i18n-${{ github.sha }}
-          tag_name: AUTO-PUSH
+          name: Auto Release nightly v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
+          tag_name: v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
+          body: Scheduled task on ${{ steps.date.outputs.date }}
+          prerelease: true
+
+      - name: Release Manually build
+        uses: softprops/action-gh-release@v1
+        if: ${{ github.GITHUB_EVENT_NAME }} == 'workflow_dispatch'
+        with:
+          files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
+          name: Release v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}
+          tag_name: v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}
+          body: release v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}
