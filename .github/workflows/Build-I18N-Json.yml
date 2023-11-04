@@ -16,7 +16,7 @@ env:
   GIT_REPO: ${{secrets.GIT_REPO}}
   PARATRANZ_TOKEN: ${{secrets.PARATRANZ_TOKEN}}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  CHINESE_VERSION: alpha4.1.0
+  CHINESE_VERSION: auto-nightly
   SOURCE_TYPE: common
 
 jobs:
