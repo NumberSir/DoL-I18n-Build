@@ -85,6 +85,7 @@ jobs:
         run: |
           yarn install
           yarn run ts:build
+          yarn run build:webpack
 
       - name: Copy img (Win)
         if: runner.os == 'Windows'
