@@ -147,13 +147,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: I18nMod-${{ github.sha }}
-          path: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/ModI18N.mod.zip
+          path: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
 
       - name: Release i18n Mod (Nightly)
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'schedule' }}
         with:
-          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/ModI18N.mod.zip
+          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
           name: Auto Release nightly v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
           tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}-${{ github.sha }}
           body: Scheduled task on ${{ steps.date.outputs.date }}
@@ -163,7 +163,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/ModI18N.mod.zip
+          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
           name: Release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
           tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}-${{ github.sha }}
           body: release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
