@@ -136,7 +136,7 @@ jobs:
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
         run: |
           echo "密码: dol-chs" >> "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/passwordHint.txt"
-          echo '{"modName":"ModI18N","password":"dol-chs","passwordHintFile":"passwordHint.txt"}' >> "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/cryptModConfig.json"
+          echo '{"modName":"ModI18N","password":"dol-chs","passwordHintFile":"${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/passwordHint.txt"}' >> "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/cryptModConfig.json"
           echo '{"name": "dol-chs-shell","version": "1.0.0","styleFileList": [],"scriptFileList_earlyload": ["earlyload.js"],"scriptFileList_inject_early": ["SimpleCryptWrapper.js"],"scriptFileList_preload": [],"scriptFileList": [],"tweeFileList": [],"imgFileList": [],"imgFileReplaceList": [],"additionFile": [],"additionBinaryFile": [],"addonPlugin": [],"dependenceInfo": [{"modName": "ModLoader","version": "^2.5.1"},{"modName": "SweetAlert2Mod","version": "^1.0.0"}]}' >> "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/bootTemplate.json"
           node "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/encryptTool.js" "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/cryptModConfig.json" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/bootTemplate.json" "${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip"
 
