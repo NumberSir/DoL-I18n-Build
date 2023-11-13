@@ -36,8 +36,12 @@ jobs:
 
       ##### SOURCE CODE & PYTHON #####
       - name: Fetch game source code
-        working-directory: ${{ github.workspace }}/vrelnir_localization
-        run: git submodule update --init --recursive
+        uses: actions/checkout@v4
+        with:
+          repository: NumberSir/vrelnir_localization
+          path: ${{ github.workspace }}/vrelnir_localization
+          ref: main
+          submodules: recursive
 
       - name: Python installation
         uses: actions/setup-python@v4.7.0
@@ -116,12 +120,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Lyoko-Jeremie/SimpleCryptWrapperMod
-          path: SimpleCryptWrapperMod
+          path: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod
           ref: master
           submodules: recursive
 
       - name: Build CryptWrapper
-        working-directory: ${{ github.workspace }}/SimpleCryptWrapperMod
+        working-directory: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod
         run: |
           yarn install
           yarn run build:ts
@@ -131,10 +135,10 @@ jobs:
       - name: Encrypt i18n Mod
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
         run: |
-          echo "密码: dol-chs" >> "${{ github.workspace }}/SimpleCryptWrapperMod/passwordHint.txt"
-          echo '{"modName":"ModI18N","password":"dol-chs","passwordHintFile":"passwordHint.txt"}' >> "${{ github.workspace }}/SimpleCryptWrapperMod/cryptModConfig.json"
-          echo '{"name": "dol-chs-shell","version": "1.0.0","styleFileList": [],"scriptFileList_earlyload": ["earlyload.js"],"scriptFileList_inject_early": ["SimpleCryptWrapper.js"],"scriptFileList_preload": [],"scriptFileList": [],"tweeFileList": [],"imgFileList": [],"imgFileReplaceList": [],"additionFile": [],"additionBinaryFile": [],"addonPlugin": [],"dependenceInfo": [{"modName": "ModLoader","version": "^2.5.1"},{"modName": "SweetAlert2Mod","version": "^1.0.0"}]}' >> "${{ github.workspace }}/SimpleCryptWrapperMod/bootTemplate.json"
-          node "${{ github.workspace }}/SimpleCryptWrapperMod/dist-tools/encryptTool.js" "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "${{ github.workspace }}/SimpleCryptWrapperMod/cryptModConfig.json" "${{ github.workspace }}/SimpleCryptWrapperMod/bootTemplate.json" "${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip"
+          echo "密码: dol-chs" >> "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/passwordHint.txt"
+          echo '{"modName":"ModI18N","password":"dol-chs","passwordHintFile":"passwordHint.txt"}' >> "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/cryptModConfig.json"
+          echo '{"name": "dol-chs-shell","version": "1.0.0","styleFileList": [],"scriptFileList_earlyload": ["earlyload.js"],"scriptFileList_inject_early": ["SimpleCryptWrapper.js"],"scriptFileList_preload": [],"scriptFileList": [],"tweeFileList": [],"imgFileList": [],"imgFileReplaceList": [],"additionFile": [],"additionBinaryFile": [],"addonPlugin": [],"dependenceInfo": [{"modName": "ModLoader","version": "^2.5.1"},{"modName": "SweetAlert2Mod","version": "^1.0.0"}]}' >> "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/bootTemplate.json"
+          node "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/encryptTool.js" "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/cryptModConfig.json" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/bootTemplate.json" "${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip"
 
       - name: Upload i18n Mod
         uses: actions/upload-artifact@v3
