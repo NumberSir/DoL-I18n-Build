@@ -34,9 +34,14 @@ jobs:
           ref: ${{ github.head_ref }}
           submodules: true
 
+      ##### SOURCE CODE & PYTHON #####
       - name: Fetch game source code
-        working-directory: ${{ github.workspace }}/vrelnir_localization
-        run: git submodule update --init --recursive
+        uses: actions/checkout@v4
+        with:
+          repository: NumberSir/vrelnir_localization
+          path: ${{ github.workspace }}/vrelnir_localization
+          ref: main
+          submodules: recursive
 
       - name: Python installation
         uses: actions/setup-python@v4.7.0
@@ -58,6 +63,7 @@ jobs:
           version=`cat ${{ github.workspace }}/vrelnir_localization/degrees-of-lewdity-master/version`
           echo "::set-output name=version::$version"
 
+      ##### MOD LOADER & NODEJS #####
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -109,17 +115,47 @@ jobs:
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
         run: node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
 
+#      ##### ENCRYPT #####
+#      - name: Simple Crypt Wrapper Mod
+#        uses: actions/checkout@v4
+#        with:
+#          repository: Lyoko-Jeremie/SimpleCryptWrapperMod
+#          path: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod
+#          ref: master
+#          submodules: recursive
+#
+#      - name: Build CryptWrapper
+#        working-directory: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod
+#        run: |
+#          yarn install
+#          yarn run build:ts
+#          yarn run build:webpack
+#          yarn run webpack:tools
+#
+#      - name: Encrypt i18n Mod
+#        working-directory: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out
+#        run: |
+#          cp "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/encryptTool.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/encryptTool.js"
+#          cp "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist/earlyload/earlyload.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/earlyload.js"
+#          cp "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist/SimpleCryptWrapper.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/SimpleCryptWrapper.js"
+#          echo "密码: dol-chs" > "passwordHint.txt"
+#          echo '{"modName":"ModI18N","password":"dol-chs","passwordHintFile":"passwordHint.txt"}' > "cryptModConfig.json"
+#          echo '{"name": "dol-chs-shell","version": "1.0.0","styleFileList": [],"scriptFileList_earlyload": ["earlyload.js"],"scriptFileList_inject_early": ["SimpleCryptWrapper.js"],"scriptFileList_preload": [],"scriptFileList": [],"tweeFileList": [],"imgFileList": [],"imgFileReplaceList": [],"additionFile": [],"additionBinaryFile": [],"addonPlugin": [],"dependenceInfo": [{"modName": "ModLoader","version": "^2.5.1"},{"modName": "SweetAlert2Mod","version": "^1.0.0"}]}' > "bootTemplate.json"
+#          node "encryptTool.js" "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "cryptModConfig.json" "bootTemplate.json" "${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip"
+
       - name: Upload i18n Mod
         uses: actions/upload-artifact@v3
         with:
           name: I18nMod-${{ github.sha }}
           path: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
+#          path: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
 
       - name: Release i18n Mod (Nightly)
         uses: softprops/action-gh-release@v1
         if: ${{ github.event_name == 'schedule' }}
         with:
           files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
+#          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
           name: Auto Release nightly v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
           tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}-${{ github.sha }}
           body: Scheduled task on ${{ steps.date.outputs.date }}
@@ -130,6 +166,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
           files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
+#          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
           name: Release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
           tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}-${{ github.sha }}
           body: release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
