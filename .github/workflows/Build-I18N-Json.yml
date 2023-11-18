@@ -153,7 +153,7 @@ jobs:
       - name: Rename i18n Mod (Nightly)
         if: ${{ github.event_name == 'schedule' }}
         run: |
-          mv ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-chs-${{ env.CHINESE_VERSION }}.mod.zip
+          mv ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}.mod.zip
 
       - name: Release i18n Mod (Nightly)
         uses: softprops/action-gh-release@v1
@@ -169,7 +169,7 @@ jobs:
       - name: Rename i18n Mod (Manually)
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          mv ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-chs-${{ github.event.inputs.chinese_version }}.mod.zip
+          mv ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}.mod.zip
 
       - name: Release i18n Mod (Manually)
         uses: softprops/action-gh-release@v1
