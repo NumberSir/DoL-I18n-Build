@@ -2,56 +2,68 @@ name: Build I18N
 run-name: 小月珰正在打包汉化词典，吱嘎
 
 on:
-  push:
-    branches: [ "main" ]
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      chinese_version:
+        description: "汉化版本"
+
+permissions:
+  contents: write
 
 env:
   GIT_REPO: ${{secrets.GIT_REPO}}
   PARATRANZ_TOKEN: ${{secrets.PARATRANZ_TOKEN}}
-  CHINESE_VERSION: 0.4.2.7-chs-alpha4.0.0
-  GAME_VERSION: 0.4.2.7
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CHINESE_VERSION: auto-nightly
   SOURCE_TYPE: common
 
 jobs:
-  run-python:
+  build-i18n-mod:
     runs-on: ubuntu-latest
     steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date + '%Y%m%d')"
+
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
           ref: ${{ github.head_ref }}
           submodules: true
-      - uses: snow-actions/git-config-user@v1.0.0
+
+      ##### SOURCE CODE & PYTHON #####
+      - name: Fetch game source code
+        uses: actions/checkout@v4
         with:
-          name: "MoonBell"
-          email: "number_sir@126.com"
-      - name: 拉取子模块
-        working-directory: ${{ github.workspace }}/vrelnir_localization
-        run: git submodule update --init --recursive
-      - name: 安装 Python
+          repository: NumberSir/vrelnir_localization
+          path: ${{ github.workspace }}/vrelnir_localization
+          ref: main
+          submodules: recursive
+
+      - name: Python installation
         uses: actions/setup-python@v4.7.0
         with:
           python-version: '3.10.11'
           cache: 'pip'
-      - name: 安装 Python 所需库
+
+      - name: Python libs installation
         working-directory: ${{ github.workspace }}/vrelnir_localization
         run: pip install -r requirements.txt
-      - name: 运行 Python 生成 i18n.json (在 data/json/i18n.json)
+
+      - name: Generating i18n.json (in data/json/i18n.json)
         working-directory: ${{ github.workspace }}/vrelnir_localization
         run: python ./build.py
-      - name: 上传 i18n.json
-        uses: actions/upload-artifact@v3
-        with:
-          name: i18n-${{ github.sha }}
-          path: ${{ github.workspace }}/vrelnir_localization/data/json/i18n.json
 
+      - name: Get game version
+        id: game_version
+        run: |
+          version=`cat ${{ github.workspace }}/vrelnir_localization/degrees-of-lewdity-master/version`
+          echo "::set-output name=version::$version"
 
-      # [i18n mod] =========================================
-
+      ##### MOD LOADER & NODEJS #####
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -79,6 +91,7 @@ jobs:
         run: |
           yarn install
           yarn run ts:build
+          yarn run build:webpack
 
       - name: Copy img (Win)
         if: runner.os == 'Windows'
@@ -88,16 +101,82 @@ jobs:
         if: runner.os == 'Linux'
         run: cp "${{ github.workspace }}/vrelnir_localization/data/json/i18n.json" "${{ github.workspace }}/ModLoader/mod/i18n/i18n.json"
 
-      - name: change mod version in boot.json
+      - name: Change Mod Version in boot.json (Nightly)
+        if: ${{ github.event_name == 'schedule' }}
         working-directory: ${{ github.workspace }}
-        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}" "${{ env.GAME_VERSION }}"
+        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ env.CHINESE_VERSION }}" "${{ steps.game_version.outputs.version }}"
+
+      - name: Change Mod Version in boot.json (Manually)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        working-directory: ${{ github.workspace }}
+        run: node "${{ github.workspace }}/change_mod_version.js" "${{ github.workspace }}/ModLoader/mod/i18n/boot.json" "${{ github.event.inputs.chinese_version }}" "${{ steps.game_version.outputs.version }}"
 
       - name: Build i18n Mod
         working-directory: ${{ github.workspace }}/ModLoader/mod/i18n
         run: node "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "boot.json"
+
+#      ##### ENCRYPT #####
+#      - name: Simple Crypt Wrapper Mod
+#        uses: actions/checkout@v4
+#        with:
+#          repository: Lyoko-Jeremie/SimpleCryptWrapperMod
+#          path: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod
+#          ref: master
+#          submodules: recursive
+#
+#      - name: Build CryptWrapper
+#        working-directory: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod
+#        run: |
+#          yarn install
+#          yarn run build:ts
+#          yarn run build:webpack
+#          yarn run webpack:tools
+#
+#      - name: Encrypt i18n Mod
+#        working-directory: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out
+#        run: |
+#          cp "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist-tools/encryptTool.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/encryptTool.js"
+#          cp "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist/earlyload/earlyload.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/earlyload.js"
+#          cp "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/dist/SimpleCryptWrapper.js" "${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/SimpleCryptWrapper.js"
+#          echo "密码: dol-chs" > "passwordHint.txt"
+#          echo '{"modName":"ModI18N","password":"dol-chs","passwordHintFile":"passwordHint.txt"}' > "cryptModConfig.json"
+#          echo '{"name": "dol-chs-shell","version": "1.0.0","styleFileList": [],"scriptFileList_earlyload": ["earlyload.js"],"scriptFileList_inject_early": ["SimpleCryptWrapper.js"],"scriptFileList_preload": [],"scriptFileList": [],"tweeFileList": [],"imgFileList": [],"imgFileReplaceList": [],"additionFile": [],"additionBinaryFile": [],"addonPlugin": [],"dependenceInfo": [{"modName": "ModLoader","version": "^2.5.1"},{"modName": "SweetAlert2Mod","version": "^1.0.0"}]}' > "bootTemplate.json"
+#          node "encryptTool.js" "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "cryptModConfig.json" "bootTemplate.json" "${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip"
 
       - name: Upload i18n Mod
         uses: actions/upload-artifact@v3
         with:
           name: I18nMod-${{ github.sha }}
           path: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
+#          path: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
+      
+      - name: Rename i18n Mod (Nightly)
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          mv ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}.mod.zip
+
+      - name: Release i18n Mod (Nightly)
+        uses: softprops/action-gh-release@v1
+        if: ${{ github.event_name == 'schedule' }}
+        with:
+          files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}.mod.zip
+#          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
+          name: Auto Release nightly v${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}
+          tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ env.CHINESE_VERSION }}-auto-${{ steps.date.outputs.date }}-${{ github.sha }}
+          body: Scheduled task on ${{ steps.date.outputs.date }}
+          prerelease: true
+
+      - name: Rename i18n Mod (Manually)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          mv ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}.mod.zip
+
+      - name: Release i18n Mod (Manually)
+        uses: softprops/action-gh-release@v1
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        with:
+          files: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N-${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}.mod.zip
+#          files: ${{ github.workspace }}/ModLoader/mod/SimpleCryptWrapperMod/out/ModI18N.mod.zip
+          name: Release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
+          tag_name: ${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}-${{ github.sha }}
+          body: release v${{ steps.game_version.outputs.version }}-chs-${{ github.event.inputs.chinese_version }}
