@@ -1,9 +1,10 @@
 var fs = require('fs');
+const JSON5 = require('json5');
 
 console.log('process.argv', process.argv)
 var bootJson = process.argv[2];
 
-var boot = JSON.parse(fs.readFileSync(bootJson, 'utf8'));
+var boot = JSON5.parse(fs.readFileSync(bootJson, 'utf8'));
 var version = process.argv[3];
 var game_version = process.argv[4];
 
@@ -13,4 +14,4 @@ if (gvd) {
     gvd.version = `=${game_version}`;
 }
 
-fs.writeFileSync(bootJson, JSON.stringify(boot, null, 2), 'utf8');
+fs.writeFileSync(bootJson, JSON5.stringify(boot, null, 2), 'utf8');
