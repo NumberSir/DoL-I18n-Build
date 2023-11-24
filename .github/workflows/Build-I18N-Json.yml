@@ -86,6 +86,7 @@ jobs:
           yarn install
           yarn run ts:BeforeSC2
           yarn run webpack:BeforeSC2
+          yarn run webpack:BeforeSC2-comp
           yarn run ts:ForSC2
           yarn run webpack:insertTools
           yarn run tras:babel
