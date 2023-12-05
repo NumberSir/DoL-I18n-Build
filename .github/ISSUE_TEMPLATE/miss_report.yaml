@@ -1,0 +1,36 @@
+name: 脚本漏抓反馈
+description: 漏抓内容的详细信息
+labels: ['miss']
+body:
+  - type: textarea
+    id: filepath
+    attributes:
+      label: 文件位置
+      description: |
+        游戏源文件的路径，必填
+        如 `03-JavaScript/sexShopMenu.js`
+    validations:
+      required: true
+  - type: textarea
+    id: content
+    attributes:
+      label: 漏抓原文
+      description: |
+        漏抓的游戏原文复制粘贴，必填
+        如有多条格式相似的原文，可以只填写一份，并在**备注**中说明格式
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: 备注
+      description: 如果有，请在这里填写其他需要注意的信息
+    validations:
+      required: false
+  - type: textarea
+    id: source
+    attributes:
+      label: 问题来源
+      description: 如果有，请在这里填写来源的链接 / 截图 / 文字说明
+    validations:
+      required: false
