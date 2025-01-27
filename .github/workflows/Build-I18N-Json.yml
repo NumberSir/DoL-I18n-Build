@@ -79,6 +79,10 @@ jobs:
           path: ModLoader
           ref: master
           submodules: recursive
+          
+      - name: Update submods
+        working-directory: ${{ github.workspace }}/ModLoader
+        run: git submodule update --init --recursive
 
       - name: Build ModLoader
         working-directory: ${{ github.workspace }}/ModLoader
