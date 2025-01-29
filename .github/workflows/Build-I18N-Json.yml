@@ -75,7 +75,7 @@ jobs:
       - name: ModLoader
         uses: actions/checkout@v4
         with:
-          repository: NumberSir/sugarcube-2-ModLoader
+          repository: Lyoko-Jeremie/sugarcube-2-ModLoader
           path: ModLoader
           ref: master
           submodules: recursive
