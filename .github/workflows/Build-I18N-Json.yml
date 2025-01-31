@@ -153,7 +153,7 @@ jobs:
 #          node "encryptTool.js" "${{ github.workspace }}/ModLoader/dist-insertTools/packModZip.js" "cryptModConfig.json" "bootTemplate.json" "${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip"
 
       - name: Upload i18n Mod
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: I18nMod-${{ github.sha }}
           path: ${{ github.workspace }}/ModLoader/mod/i18n/ModI18N.mod.zip
