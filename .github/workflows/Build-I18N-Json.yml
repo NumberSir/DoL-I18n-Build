@@ -47,6 +47,7 @@ jobs:
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
       - name: Initialize Project
+        working-directory: ${{ github.workspace }}/vrelnir_localization
         run: uv sync
 
       - name: Generating i18n.json (in data/json/i18n.json)
