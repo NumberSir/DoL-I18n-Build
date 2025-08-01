@@ -44,7 +44,7 @@ jobs:
           submodules: recursive
 
       - name: Install UV  # https://docs.astral.sh/uv/#installation
-        run: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
       - name: Initialize Project
         run: uv sync
